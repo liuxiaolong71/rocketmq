@@ -336,6 +336,8 @@ public class ReplyMessageProcessor extends AbstractSendMessageProcessor {
                 sendMessageContext.setCommercialSendSize(wroteSize);
                 sendMessageContext.setCommercialOwner(owner);
             }
+            this.brokerController.getBrokerStatsManager().incBrokerPutFailNums(sendMessageContext.getSendMsgNum());
+            this.brokerController.getBrokerStatsManager().incTopicPutFailNums(msg.getTopic(), sendMessageContext.getSendMsgNum(), 1);
         }
     }
 

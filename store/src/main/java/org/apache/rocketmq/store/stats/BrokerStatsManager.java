@@ -179,6 +179,8 @@ public class BrokerStatsManager {
         this.statsTable.put(Stats.TOPIC_PUT_SIZE, new StatsItemSet(Stats.TOPIC_PUT_SIZE, this.scheduledExecutorService, log));
         this.statsTable.put(Stats.GROUP_GET_NUMS, new StatsItemSet(Stats.GROUP_GET_NUMS, this.scheduledExecutorService, log));
         this.statsTable.put(Stats.GROUP_GET_SIZE, new StatsItemSet(Stats.GROUP_GET_SIZE, this.scheduledExecutorService, log));
+        this.statsTable.put(Stats.TOPIC_PUT_FAIL_NUMS, new StatsItemSet(Stats.TOPIC_PUT_FAIL_NUMS, this.scheduledExecutorService, log));
+        this.statsTable.put(Stats.BROKER_PUT_FAIL_NUMS, new StatsItemSet(Stats.BROKER_PUT_FAIL_NUMS, this.scheduledExecutorService, log));
         this.statsTable.put(GROUP_ACK_NUMS, new StatsItemSet(GROUP_ACK_NUMS, this.scheduledExecutorService, log));
         this.statsTable.put(GROUP_CK_NUMS, new StatsItemSet(GROUP_CK_NUMS, this.scheduledExecutorService, log));
         this.statsTable.put(Stats.GROUP_GET_LATENCY, new StatsItemSet(Stats.GROUP_GET_LATENCY, this.scheduledExecutorService, log));
@@ -332,6 +334,7 @@ public class BrokerStatsManager {
     public void onTopicDeleted(final String topic) {
         this.statsTable.get(Stats.TOPIC_PUT_NUMS).delValue(topic);
         this.statsTable.get(Stats.TOPIC_PUT_SIZE).delValue(topic);
+        this.statsTable.get(Stats.TOPIC_PUT_FAIL_NUMS).delValue(topic);
         if (enableQueueStat) {
             this.statsTable.get(Stats.QUEUE_PUT_NUMS).delValueByPrefixKey(topic, "@");
             this.statsTable.get(Stats.QUEUE_PUT_SIZE).delValueByPrefixKey(topic, "@");
@@ -375,6 +378,14 @@ public class BrokerStatsManager {
         if (enableQueueStat) {
             this.statsTable.get(Stats.QUEUE_PUT_SIZE).addValue(buildStatsKey(topic, queueId), size, 1);
         }
+    }
+
+    public void incBrokerPutFailNums(final int incValue) {
+        this.statsTable.get(Stats.BROKER_PUT_FAIL_NUMS).getAndCreateStatsItem(this.clusterName).getValue().add(incValue);
+    }
+
+    public void incTopicPutFailNums(final String topic, int num, int times) {
+        this.statsTable.get(Stats.TOPIC_PUT_FAIL_NUMS).addValue(topic, num, times);
     }
 
     public void incQueueGetNums(final String group, final String topic, final Integer queueId, final int incValue) {
